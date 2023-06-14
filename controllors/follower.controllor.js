@@ -208,6 +208,7 @@ exports.Feed=expressAsynchandler(async(req,res)=>{
     // get all posts of these  users
     try{
     let posts=await db.Users.findAll({
+        attributes:['username','profileURL'],
         where:{
             username:{
                 [Op.in]:username
@@ -221,7 +222,7 @@ exports.Feed=expressAsynchandler(async(req,res)=>{
             ]}
         ]
     })
-    res.status(200).send({message:'success'},{posts:posts})
+    res.status(200).send({message:'success',posts:posts})
     } catch(err){
         res.send({error:err})
     } 

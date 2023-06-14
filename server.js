@@ -32,6 +32,13 @@ app.use(postApi);
 const followApi=require('./routes/follower.route');
 app.use(followApi);
 
+const commentApi=require('./routes/comments.route');
+app.use(commentApi);
+
+const likesApi=require('./routes/likes.route');
+app.use(likesApi);
+
+
 module.exports=app;
 
 
