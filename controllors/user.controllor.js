@@ -182,7 +182,9 @@ exports.detailedViewuser=expressAsyncHandler(async(req,res)=>{
       username:username
     },
     include:[
-      {model:db.Posts}
+      {model:db.Posts},
+      {model:db.Comments},
+      {model:db.Likes}
     ]
   })
   res.send({message:"details of user",payload:response})

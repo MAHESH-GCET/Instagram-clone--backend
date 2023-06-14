@@ -9,7 +9,12 @@ const verifyToken=require('../middlewares/verifyToken');
 const {
     GetUsers,
     SendRequest,
-    GetRequests
+    GetRequests,
+    AcceptRequest,
+    RejectRequest,
+    GetFollowers,
+    RemoveFollower,
+    Feed
 
 }=require('../controllors/follower.controllor');
 
@@ -22,5 +27,21 @@ followApi.post('/:username/users/request',verifyToken,SendRequest)
 
 // get requests
 followApi.get('/:username/requests',verifyToken,GetRequests)
+
+// accept request
+followApi.put('/:username/requests/accept',verifyToken,AcceptRequest);
+
+// reject request
+followApi.delete('/:username/requests/reject',verifyToken,RejectRequest);
+
+// get followers
+followApi.get('/:username/followers',verifyToken,GetFollowers)
+
+// remove followers
+followApi.delete('/:username/followers/remove',verifyToken,RemoveFollower)
+
+// feed
+followApi.get('/:username/feed',verifyToken,Feed)
+
 // export api
 module.exports=followApi;

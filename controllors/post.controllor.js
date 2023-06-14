@@ -55,7 +55,7 @@ const decrementCount=async(username)=>{
 exports.AddPost=expressAsyncHandler(async(req,res)=>{
     const {image,caption}=req.body;
     const usernameParams=req.params.username;
-    if(checkUser(usernameParams)===true){
+    if(checkUser(usernameParams)){
         // upload image to cloudinary
         try{
             // const postUrl='';
