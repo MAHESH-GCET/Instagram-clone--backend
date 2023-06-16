@@ -54,21 +54,21 @@ const decrementCount=async(username)=>{
 // add post
 exports.AddPost=expressAsyncHandler(async(req,res)=>{
     const {image,caption}=req.body;
-    const usernameParams=req.params.username;
+    const usernameParams=req.params.username
     if(checkUser(usernameParams)){
         // upload image to cloudinary
         try{
-            // const postUrl='';
-            // const postUpload=await cloudinary.uploader.upload(image,{
-            //     folder:'wal'
-            // })
-            // if(postUpload.secure_URl){
-            //     postUrl=postUpload.secure_URL
-            // }
-            // else{
-            //     postUrl='https://www.littlethings.info/wp-content/uploads/2014/04/dummy-image-green-e1398449160839.jpg'
-            // }
-            postUrl='https://www.littlethings.info/wp-content/uploads/2014/04/dummy-image-green-e1398449160839.jpg'
+            let postUrl=''
+            const postUpload=await cloudinary.uploader.upload(image,{
+                folder:'wal',
+                width:400,
+                height:500,
+                crop:'fill'
+            })
+            if(postUpload){
+                postUrl=postUpload.secure_url;
+            }
+            //postUrl='https://www.littlethings.info/wp-content/uploads/2014/04/dummy-image-green-e1398449160839.jpg'
             let post=await db.Posts.create({
                 username:usernameParams,
                 caption:caption,
@@ -77,10 +77,10 @@ exports.AddPost=expressAsyncHandler(async(req,res)=>{
             incrementCount(usernameParams);
             res.status(200).send({message:"success",post:post})
         } catch(err){
-            res.send({message:"error uploading the image"})
+            console.log(err)
         }
     } else{
-        res.status(200).send({message:"User not found"})
+        res.status(404).send({message:"User not found"})
     }
     
 })

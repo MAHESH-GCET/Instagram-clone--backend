@@ -19,7 +19,8 @@ const {userRegistration,
     forgotPassword,
     resetPassword,
     detailedViewuser,
-    FileUpload
+    FileUpload,
+    userDetails
 }=require('../controllors/user.controllor')
 
 // user registartion
@@ -27,6 +28,9 @@ userApi.post('/userApi/register',userRegistration);
 
 // user login
 userApi.post('/userAPi/login',userLogin);
+
+// user details
+userApi.get('/user/:username',verifyToken,userDetails)
 
 // edit / update details
 userApi.put('/userApi/:username/update',verifyToken,updateDetails);

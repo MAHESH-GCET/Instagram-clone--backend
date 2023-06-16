@@ -207,19 +207,17 @@ exports.Feed=expressAsynchandler(async(req,res)=>{
     
     // get all posts of these  users
     try{
-    let posts=await db.Users.findAll({
-        attributes:['username','profileURL'],
+    let posts=await db.Posts.findAll({
         where:{
             username:{
                 [Op.in]:username
             },  
         },
         include:[
-            {model:db.Posts,
-            include:[
-                {model:db.Comments},
-                {model:db.Likes}
-            ]}
+            {model:db.Users,
+            attributes:['profileURL']},
+            {model:db.Comments},
+            {model:db.Likes}
         ]
     })
     res.status(200).send({message:'success',posts:posts})

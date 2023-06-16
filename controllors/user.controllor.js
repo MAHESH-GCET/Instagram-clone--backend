@@ -9,6 +9,7 @@ const joi=require('joi');
 const jwt=require('jsonwebtoken');
 // import database
 const db=require('../models/index');
+const storage=require('../custom_modules/cloudinary')
 
 
 
@@ -91,22 +92,62 @@ exports.userLogin=expressAsyncHandler(async(req,res)=>{
     }
 })
 
+// user details
+exports.userDetails=expressAsyncHandler(async(req,res)=>{
+  const username=req.params.username;
+  let checkUser=await db.Users.findOne({
+    where:{username:username}
+  })
+  if(checkUser!==null){
+    res.status(200).send({message:"success",user:checkUser})
+  } else{
+    res.status(404).send({message:"error"})
+  }
+})
+
 // update user details
 exports.updateDetails=expressAsyncHandler(async(req,res)=>{
     const username=req.params.username;
-    const data=req.body;
+    const {newProfile,bio}=req.body;
     let checkUser=await db.Users.findOne({
         where:{username:username}
     })
+    console.log('image:',newProfile,'bio',bio)
     if(checkUser!==null){
-        await db.Users.update({bio:data.bio}, {
-            where:{
-            username:username
-            }
+      if(newProfile.length==0){
+        await db.Users.update({bio:bio}, {
+          where:{
+          username:username
+          }
         });
-        res.send({message:"bio updated successfully"})
+        res.status(200).send({message:"bio updated successfully"})
+      }
+      else{
+        try{
+          const result=await storage.uploader.upload(newProfile,{
+            folder:'wal',
+            width:300,
+            height:300,
+            crop:'scale'
+          })
+          const newProfileUrl=result.secure_url;
+          await db.Users.update({
+            bio:bio,
+            profileURL:newProfileUrl},{
+              where:{
+                username:username
+              }
+            }
+          )
+          res.status(200).send({message:'success'})
+      
+        } catch(err){
+          res.status(404).send({error:err})
+      
+        }
+      } 
     } else{
-        res.send({message:"user not found"})
+        res.status(404).send({message:"user not found"})
     }
 })
 
@@ -177,12 +218,11 @@ exports.resetPassword = expressAsyncHandler(async (req, res) => {
 // get all details of user
 exports.detailedViewuser=expressAsyncHandler(async(req,res)=>{
   const username=req.params.username;
-  let response=await db.Users.findOne({
+  let response=await db.Posts.findAll({
     where:{
       username:username
     },
     include:[
-      {model:db.Posts},
       {model:db.Comments},
       {model:db.Likes}
     ]
@@ -193,7 +233,7 @@ exports.detailedViewuser=expressAsyncHandler(async(req,res)=>{
 
 
 
-const storage=require('../custom_modules/cloudinary')
+
 // check file upload
 exports.FileUpload=expressAsyncHandler(async(req,res)=>{
   const {profileUrl}=req.body;
