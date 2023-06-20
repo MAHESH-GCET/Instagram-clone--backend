@@ -21,23 +21,11 @@ app.listen(PORT,()=>{
 app.use(express.json({limit: "10mb", extended: true}))
 app.use(express.urlencoded({limit: "10mb", extended: true, parameterLimit: 50000}))
 
+// importing router from index.js fille
+const router=require('./routes/index')
 
-//  import api
-const userApi=require('./routes/user.route');
-app.use(userApi);
-
-const postApi=require('./routes/post.route');
-app.use(postApi);
-
-const followApi=require('./routes/follower.route');
-app.use(followApi);
-
-const commentApi=require('./routes/comments.route');
-app.use(commentApi);
-
-const likesApi=require('./routes/likes.route');
-app.use(likesApi);
-
+// middleware for router
+app.use('/',router);
 
 module.exports=app;
 

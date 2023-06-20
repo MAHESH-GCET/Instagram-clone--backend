@@ -52,7 +52,7 @@ const decrementCount=async(username)=>{
 }
 
 // add post
-exports.AddPost=expressAsyncHandler(async(req,res)=>{
+exports.addPost=expressAsyncHandler(async(req)=>{
     const {image,caption}=req.body;
     const usernameParams=req.params.username
     if(checkUser(usernameParams)){
@@ -62,8 +62,8 @@ exports.AddPost=expressAsyncHandler(async(req,res)=>{
             const postUpload=await cloudinary.uploader.upload(image,{
                 folder:'wal',
                 width:400,
-                height:500,
-                crop:'fill'
+                height:400,
+                crop:'scale'
             })
             if(postUpload){
                 postUrl=postUpload.secure_url;
@@ -75,53 +75,64 @@ exports.AddPost=expressAsyncHandler(async(req,res)=>{
                 imageUrl:postUrl
             })
             incrementCount(usernameParams);
-            res.status(200).send({message:"success",post:post})
+            return ({message:"success",post:post})
         } catch(err){
-            console.log(err)
+            throw new Error(err)
         }
     } else{
-        res.status(404).send({message:"User not found"})
+        return ({message:"User not found"})
     }
     
 })
 
 // edit post
-exports.EditPost=expressAsyncHandler(async(req,res)=>{
+exports.editPost=expressAsyncHandler(async(req,res)=>{
     const {caption}=req.body;
     const usernameParams=req.params.username
     const postId=req.params.postId
-    // check user
-    if(checkUser(usernameParams)===true){
-        await db.Posts.update({caption:caption},{
+    try{
+        // check user
+        if(checkUser(usernameParams)){
+            await db.Posts.update({caption:caption},{
             where:{
                 postId:postId,
                 username:usernameParams
             }
-        })
-        res.send({message:"success"})
-    }
-    else{
-        res.send({message:"USer not found"})
+            })
+            return ({message:"success"})
+        }
+        else{
+            return ({message:"USer not found"})
+        }
+    } 
+    catch(error){
+        throw new Error(error)
     }
 
 })
 
 // delete post
-exports.DeletePost=expressAsyncHandler(async(req,res)=>{
+exports.deletePost=expressAsyncHandler(async(req,res)=>{
     const username=req.params.username;
     const postId=req.params.postId;
-    // check user
-    if(checkUser(username)){
-        // delete post
-        await db.Posts.destroy({
+    try{
+         // check user
+        if(checkUser(username)){
+            // delete post
+            await db.Posts.destroy({
             where:{
                 postId:postId,
                 username:username
             }
-        })
-        decrementCount(username);
-        res.send({message:"deleted"})
-    } else{
-        res.send({message:'User not found'})
+            })
+            decrementCount(username);
+            return ({message:"deleted"})
+        } else{
+            return ({message:'User not found'})
+        }
     }
+    catch(error){
+        throw new Error(error)
+    }
+   
 })
