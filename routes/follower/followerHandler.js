@@ -6,7 +6,9 @@ const {
     getFollowers,
     removeFollower,
     feed,
-    getUsers
+    getUsers,
+    getFollowing,
+    removeFollowing
 }=require('../../controllors/followerControllor')
 
 // req handlers
@@ -91,6 +93,28 @@ const getUsersHandler=async(req,res)=>{
         res.status(400).send({'error':error.message})
     }
 }
+
+// get following
+const getFollowingHandler=async(req,res)=>{
+    try{
+        const result=await getFollowing(req)
+        res.status(200).send(result)
+    }
+    catch(error){
+        res.status(400).send({'error':error.message})
+    }
+}
+
+// remove following
+const removeFollowingHandler=async(req,res)=>{
+    try{
+        const result=await removeFollowing(req)
+        res.status(200).send(result)
+    }
+    catch(error){
+        res.status(400).send({'error':error.message})
+    }
+}
 // export handler
 module.exports={
     sendRequestHandler,
@@ -100,5 +124,7 @@ module.exports={
     getFollowersHandler,
     removeFollowerHandler,
     getFeedHandler,
-    getUsersHandler
+    getUsersHandler,
+    getFollowingHandler,
+    removeFollowingHandler
 }

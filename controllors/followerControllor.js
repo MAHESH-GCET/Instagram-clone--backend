@@ -162,12 +162,17 @@ exports.getFollowers = expressAsynchandler(async (req) => {
   let checkFollowers = await db.Followers.findAll({
     where: {
       username: loggedUser,
-    },
+    }
   });
-  if (checkFollowers.length === 0) {
+  // get all users
+  let allusers=await db.Users.findAll();
+  const followersData=allusers.filter(user=>{
+    return checkFollowers.some(follower=> follower.follower===user.username)
+  })
+  if (followersData.length === 0) {
     return { message: "No FOllowers" };
   } else {
-    return { message: "followers", followers: checkFollowers };
+    return { message: "followers", followers: followersData };
   }
 });
 
@@ -176,7 +181,7 @@ exports.removeFollower = expressAsynchandler(async (req) => {
   // logged user
   const loggedUser = req.params.username;
   // follower user
-  const followeruser = req.body.follower;
+  const followeruser = req.params.followerUser;
 
   // check if follower alctually followes user
   const checkFollower = await db.Followers.findOne({
@@ -199,6 +204,51 @@ exports.removeFollower = expressAsynchandler(async (req) => {
     return { message: "removed" };
   }
 });
+
+// get following
+exports.getFollowing=expressAsynchandler(async(req)=>{
+  // logged user
+  const loggedUser=req.params.username;
+  // get all following users
+  const followingUsers=await db.Followers.findAll({
+    where:{
+      follower:loggedUser
+    },
+    include:[
+      {model:db.Users}
+    ]
+  });
+  // get all users data who are following logged user
+  let followingDetails=[]
+  await Promise.all(
+  followingUsers.map(async(following)=>{
+    let followingDetail=await db.Users.findOne({
+      where:{
+        username:following.username
+      },
+      attributes:['username','profileURL']
+    })
+    followingDetails.push(followingDetail.dataValues)
+  }))
+  return { message: "following", following: followingDetails };
+})
+
+// remove following
+exports.removeFollowing=expressAsynchandler(async(req)=>{
+  // get logged user
+  const loggedUser=req.params.username;
+  // get following username
+  const followingUser=req.params.followingUser;
+  // remove folowing
+  await db.Followers.destroy({
+    where:{
+      follower:loggedUser,
+      username:followingUser
+    }
+  })
+  return {message:'removed'}
+})
+
 
 // feed
 exports.feed = expressAsynchandler(async (req) => {

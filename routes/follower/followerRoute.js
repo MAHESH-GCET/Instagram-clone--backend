@@ -14,7 +14,9 @@ const {
     getFollowersHandler,
     removeFollowerHandler,
     getUsersHandler,
-    getFeedHandler
+    getFeedHandler,
+    getFollowingHandler,
+    removeFollowingHandler
 }=require('./followerHandler')
 
 // routes
@@ -37,10 +39,16 @@ followApi.delete('/:username/requests/reject',verifyToken,rejectRequestHandler);
 followApi.get('/:username/followers',verifyToken,getFollowersHandler)
 
 // remove followers
-followApi.delete('/:username/followers/remove',verifyToken,removeFollowerHandler)
+followApi.delete('/:username/followers/:followerUser/remove',verifyToken,removeFollowerHandler)
 
 // feed
 followApi.get('/:username/feed',verifyToken,getFeedHandler)
+
+// get following
+followApi.get('/:username/following',verifyToken,getFollowingHandler)
+
+// remove following
+followApi.delete('/:username/following/:followingUser/remove',verifyToken,removeFollowingHandler)
 
 // export api
 module.exports=followApi;

@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.removeConstraint('Requests','requests_ibfk_1');
+    //await queryInterface.removeConstraint('Requests','requests_ibfk_1');
     await queryInterface.addConstraint('Requests',{
       fields:['from_username'],
       type:'foreign key',
@@ -17,7 +17,7 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.removeConstraint('Requests', 'Requests_from_username_fkey');
+    //await queryInterface.removeConstraint('Requests', 'Requests_from_username_fkey');
     await queryInterface.addConstraint('Requests', {
       fields: ['to_username'],
       type: 'foreign key',

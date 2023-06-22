@@ -17,7 +17,7 @@ const addPostHandler=async(req,res)=>{
 const editPostHandler=async(req,res)=>{
     try{
         const result=await editPost(req)
-        res.status(201).send(result)
+        res.status(200).send(result)
     } catch(error){
         res.status(400).send({'error':error.message})
     }
@@ -27,7 +27,7 @@ const editPostHandler=async(req,res)=>{
 const deletePostHandler=async(req,res)=>{
     try{
         const result=await deletePost(req)
-        res.status(201).send(result)
+        res.status(200).send(result)
     } catch(error){
         res.status(400).send({'error':error.message})
     }
