@@ -1,9 +1,20 @@
 const {
     addPost,
     editPost,
-    deletePost
+    deletePost,
+    getPostDetails
 }= require('../../controllors/postControllor')
 
+// get post details
+const getPostDetailsHandler=async(req,res)=>{
+    try{
+        const result=await getPostDetails(req)
+        res.status(200).send(result)
+    }
+    catch(error){
+        res.status(400).send({'error':error.message})
+    }
+}
 // add post handler
 const addPostHandler=async(req,res)=>{
     try{
@@ -36,5 +47,6 @@ const deletePostHandler=async(req,res)=>{
 module.exports={
     addPostHandler,
     editPostHandler,
-    deletePostHandler
+    deletePostHandler,
+    getPostDetailsHandler
 }

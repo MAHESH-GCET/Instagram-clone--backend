@@ -50,7 +50,30 @@ const decrementCount=async(username)=>{
         }
     })
 }
+// get post details
+exports.getPostDetails=expressAsyncHandler(async(req)=>{
+    const postId=req.params.postId;
 
+    // get post details
+    let postDetails=await db.Posts.findAll({
+        where:{
+            postId:postId
+        },
+        attributes:['imageUrl','username'],
+        include:[
+            {model:db.Users,attributes:['profileURL']},
+            {model:db.Comments,include:[{model:db.Users,attributes:['profileURL']}]},
+            {model:db.Likes,include:[{model:db.Users,attributes:['profileURL']}]},
+        ]
+        
+    })
+    if(postDetails.length>0){
+        return ({post:postDetails})
+    }
+    else{
+        return ({message:'failed'})
+    }
+})
 // add post
 exports.addPost=expressAsyncHandler(async(req)=>{
     const {image,caption}=req.body;
@@ -62,8 +85,7 @@ exports.addPost=expressAsyncHandler(async(req)=>{
             const postUpload=await cloudinary.uploader.upload(image,{
                 folder:'wal',
                 width:400,
-                height:400,
-                crop:'scale'
+                height:400
             })
             if(postUpload){
                 postUrl=postUpload.secure_url;

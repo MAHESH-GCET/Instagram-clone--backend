@@ -4,6 +4,26 @@ const expressAsyncHandler = require("express-async-handler");
 // import db
 const db = require("../models/index");
 // controllors
+
+// check like
+exports.checkLike=expressAsyncHandler(async(req)=>{
+  const username=req.params.username
+  const postId=req.params.postId
+  const checkLike=await db.Likes.findAll({
+    where:{
+      username:username,
+      postId:postId
+    }
+  })
+  if(checkLike.length>0){
+    return ({message:'true'})
+  }
+  else{
+    return ({message:'false'})
+  }
+})
+
+// like
 exports.like = expressAsyncHandler(async (req) => {
   // user
   const user = req.params.username;

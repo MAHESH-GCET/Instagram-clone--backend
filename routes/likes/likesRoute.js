@@ -9,8 +9,10 @@ const verifyToken = require("../../middlewares/verifyToken");
 likesApi.use(express.json());
 
 // handlers
-const { dislikeHandler, likeHandler } = require("./likesHandler");
+const { dislikeHandler, likeHandler, checkHandler } = require("./likesHandler");
 // routes
+// check
+likesApi.get('/:username/feed/:postId/check',verifyToken,checkHandler)
 // like
 likesApi.post("/:username/feed/:postId/like", verifyToken, likeHandler);
 

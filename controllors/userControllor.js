@@ -38,7 +38,7 @@ exports.userRegistration=expressAsyncHandler(async(req)=>{
             password:hashedPassword,
             age:data.age,
             gender:data.gender,
-            profileURL:data.profileUrl
+            profileURL:'https://www.wissetuinen.nl/wp-content/uploads/2016/01/profiel-icoon.jpg'
         })
         return {message:"user registered"}
       }

@@ -6,9 +6,51 @@ const { Sequelize, Op } = require("sequelize");
 // get all users
 exports.getUsers = expressAsynchandler(async (req) => {
   try {
-    let users = await db.Users.findAll();
+    let loggedUser = req.params.username;
+    
+    // get followers who are following loggedUser
+    let allFollowers = await db.Followers.findAll({
+      where: {
+        follower: loggedUser,
+      },
+    });
+    //console.log(allFollowers)
+    // filter out usernames of followers
+    let followers=[]
+    allFollowers.map(follower=>{
+      followers.push(follower.username)
+    })
+
+    // get the pending requests sent by the logged user
+    let getPendingRequests=await db.Requests.findAll({
+      where:{
+        from_username:loggedUser,
+        status:'pending'
+      },
+      attributes:['id','to_username']
+    })
+    // filter out the usernames from response
+    let pendingRequests=[]
+    getPendingRequests.map(request=>{
+      pendingRequests.push(request.to_username)
+    })
+    
+    // combine both arrays
+    followers.push(...pendingRequests)
+    //console.log(followers)
+    // get all users who are not logged user and doesnt follow logged user
+    let users = await db.Users.findAll({
+      where: {
+        username: {
+          [Op.not]: loggedUser,
+          [Op.notIn]:followers
+        }
+      },
+      attributes:['username','profileUrl']
+    });
+    
     if (users.length > 0) {
-      return { message: "users", users: users };
+      return { message: "users", users: users, pending: getPendingRequests};
     } else {
       return { message: "failed" };
     }
@@ -128,7 +170,7 @@ exports.acceptRequest = expressAsynchandler(async (req) => {
 // reject requests of loggedin user
 exports.rejectRequest = expressAsynchandler(async (req) => {
   const loggedUser = req.params.username;
-  const from_username = req.body.from_username;
+  const from_username = req.params.from_username;
 
   try {
     // check request exists
@@ -162,18 +204,23 @@ exports.getFollowers = expressAsynchandler(async (req) => {
   let checkFollowers = await db.Followers.findAll({
     where: {
       username: loggedUser,
-    }
+    },
   });
+
   // get all users
-  let allusers=await db.Users.findAll();
-  const followersData=allusers.filter(user=>{
-    return checkFollowers.some(follower=> follower.follower===user.username)
-  })
-  if (followersData.length === 0) {
-    return { message: "No FOllowers" };
-  } else {
-    return { message: "followers", followers: followersData };
-  }
+  let followerDetails = [];
+  await Promise.all(
+    checkFollowers.map(async (follower) => {
+      let followerDetail = await db.Users.findOne({
+        where: {
+          username: follower.follower,
+        },
+        attributes: ["username", "profileUrl"],
+      });
+      followerDetails.push(followerDetail.dataValues);
+    })
+  );
+  return { message: "followers", followers: followerDetails };
 });
 
 // remove a follower
@@ -206,49 +253,47 @@ exports.removeFollower = expressAsynchandler(async (req) => {
 });
 
 // get following
-exports.getFollowing=expressAsynchandler(async(req)=>{
+exports.getFollowing = expressAsynchandler(async (req) => {
   // logged user
-  const loggedUser=req.params.username;
+  const loggedUser = req.params.username;
   // get all following users
-  const followingUsers=await db.Followers.findAll({
-    where:{
-      follower:loggedUser
+  const followingUsers = await db.Followers.findAll({
+    where: {
+      follower: loggedUser,
     },
-    include:[
-      {model:db.Users}
-    ]
+    include: [{ model: db.Users }],
   });
   // get all users data who are following logged user
-  let followingDetails=[]
+  let followingDetails = [];
   await Promise.all(
-  followingUsers.map(async(following)=>{
-    let followingDetail=await db.Users.findOne({
-      where:{
-        username:following.username
-      },
-      attributes:['username','profileURL']
+    followingUsers.map(async (following) => {
+      let followingDetail = await db.Users.findOne({
+        where: {
+          username: following.username,
+        },
+        attributes: ["username", "profileURL"],
+      });
+      followingDetails.push(followingDetail.dataValues);
     })
-    followingDetails.push(followingDetail.dataValues)
-  }))
+  );
   return { message: "following", following: followingDetails };
-})
+});
 
 // remove following
-exports.removeFollowing=expressAsynchandler(async(req)=>{
+exports.removeFollowing = expressAsynchandler(async (req) => {
   // get logged user
-  const loggedUser=req.params.username;
+  const loggedUser = req.params.username;
   // get following username
-  const followingUser=req.params.followingUser;
+  const followingUser = req.params.followingUser;
   // remove folowing
   await db.Followers.destroy({
-    where:{
-      follower:loggedUser,
-      username:followingUser
-    }
-  })
-  return {message:'removed'}
-})
-
+    where: {
+      follower: loggedUser,
+      username: followingUser,
+    },
+  });
+  return { message: "removed" };
+});
 
 // feed
 exports.feed = expressAsynchandler(async (req) => {
@@ -281,7 +326,7 @@ exports.feed = expressAsynchandler(async (req) => {
       include: [
         { model: db.Users, attributes: ["profileURL"] },
         { model: db.Comments },
-        { model: db.Likes },
+        { model: db.Likes},
       ],
     });
     return { message: "success", posts: posts };

@@ -21,7 +21,7 @@ const {
 
 // routes
 // all users
-followApi.get('/users',verifyToken,getUsersHandler);
+followApi.get('/:username/users',verifyToken,getUsersHandler);
 
 // send request
 followApi.post('/:username/users/request',verifyToken,sendRequestHandler)
@@ -33,7 +33,7 @@ followApi.get('/:username/requests',verifyToken,getRequestsHandler)
 followApi.put('/:username/requests/accept',verifyToken,acceptRequestHandler);
 
 // reject request
-followApi.delete('/:username/requests/reject',verifyToken,rejectRequestHandler);
+followApi.delete('/:username/requests/:from_username/reject',verifyToken,rejectRequestHandler);
 
 // get followers
 followApi.get('/:username/followers',verifyToken,getFollowersHandler)

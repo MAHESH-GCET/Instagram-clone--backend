@@ -6,8 +6,8 @@ const verifyToken =(req,res,next)=>{
     //get bearer token from header req
     let bearerToken=req.headers.authorization;
     //check existence of bearer token
-    if(bearerToken==undefined){
-        res.send({message:"unauthorized access"})
+    if(bearerToken===undefined){
+        res.send({message:`unauthorized acccess:  ${bearerToken}`});
     }
     //if bearer token exists, get token from bearer token
     else{

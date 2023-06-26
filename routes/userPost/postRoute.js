@@ -11,9 +11,14 @@ postApi.use(express.json());
 const {
     addPostHandler,
     deletePostHandler,
-    editPostHandler
-}=require('./postHandler')
+    editPostHandler,
+    getPostDetailsHandler
+}=require('./postHandler');
+const { getPostDetails } = require('../../controllors/postControllor');
 // route
+
+// get post details
+postApi.get('/post/:postId',verifyToken,getPostDetailsHandler)
 
 // add post
 postApi.post('/:username/newPost',verifyToken,addPostHandler)
