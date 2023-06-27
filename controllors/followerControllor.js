@@ -3,6 +3,62 @@ const expressAsynchandler = require("express-async-handler");
 const db = require("../models/index");
 const { Sequelize, Op } = require("sequelize");
 
+// import elastic client
+const {client}=require('../custom_modules/elasticSearch')
+
+// function to index data into elastic search
+async function indexDataInElasticsearch(data) {
+  try {
+    const body=[]
+
+    data.forEach((doc) => {
+      const { username } = doc;
+      const profileUrl=doc.dataValues.profileUrl
+      body.push(
+        { index: { _index: 'users', _id: username } },
+        { username, profileUrl }
+      );
+    });
+
+    const { body: bulkResponse } = await client.bulk({ refresh: true, body });
+
+    if (bulkResponse && bulkResponse.errors) {
+      console.error(bulkResponse.errors);
+      return;
+    }
+    //console.log(body)
+    console.log('Data indexed successfully!');
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// search users
+exports.searchUser=expressAsynchandler(async(req)=>{
+  const username=req.params.username;
+  try {
+    const  body  = await client.search({
+      index: 'users', 
+      body: {
+        query: {
+          wildcard: {
+            username: {
+              value: `*${username}*`
+            }
+          }
+        }
+      }
+    });
+
+    const hits = body.hits.hits;
+    const user = hits.length > 0 ? hits[0]._source : null;
+    return ({'user':user})
+  }
+  catch(error){
+    return ({'error':error.message})
+  }
+})
+
 // get all users
 exports.getUsers = expressAsynchandler(async (req) => {
   try {
@@ -50,6 +106,7 @@ exports.getUsers = expressAsynchandler(async (req) => {
     });
     
     if (users.length >= 0) {
+      indexDataInElasticsearch(users);
       return { message: "users", users: users, pending: getPendingRequests};
     } else {
       return { message: "failed" };

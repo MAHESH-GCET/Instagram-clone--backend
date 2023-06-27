@@ -8,10 +8,22 @@ const {
     feed,
     getUsers,
     getFollowing,
-    removeFollowing
+    removeFollowing,
+    searchUser
 }=require('../../controllors/followerControllor')
 
 // req handlers
+
+// search users
+const searchUserHandler=async(req,res)=>{
+    try{
+        const result=await searchUser(req)
+        res.status(200).send(result)
+    }
+    catch(error){
+        res.status(400).send({'error':error.message})
+    }
+}
 // send request
 const sendRequestHandler=async(req,res)=>{
     try{
@@ -126,5 +138,6 @@ module.exports={
     getFeedHandler,
     getUsersHandler,
     getFollowingHandler,
-    removeFollowingHandler
+    removeFollowingHandler,
+    searchUserHandler
 }

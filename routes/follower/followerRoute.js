@@ -16,10 +16,14 @@ const {
     getUsersHandler,
     getFeedHandler,
     getFollowingHandler,
-    removeFollowingHandler
+    removeFollowingHandler,
+    searchUserHandler
 }=require('./followerHandler')
 
 // routes
+
+// search user
+followApi.get('/:username/search',verifyToken,searchUserHandler)
 // all users
 followApi.get('/:username/users',verifyToken,getUsersHandler);
 
