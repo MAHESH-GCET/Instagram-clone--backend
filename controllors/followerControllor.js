@@ -49,7 +49,7 @@ exports.getUsers = expressAsynchandler(async (req) => {
       attributes:['username','profileUrl']
     });
     
-    if (users.length > 0) {
+    if (users.length >= 0) {
       return { message: "users", users: users, pending: getPendingRequests};
     } else {
       return { message: "failed" };

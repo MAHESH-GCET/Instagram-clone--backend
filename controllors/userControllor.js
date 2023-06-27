@@ -113,7 +113,7 @@ exports.updateDetails=expressAsyncHandler(async(req)=>{
       })
     
       if(checkUser!==null){
-        if(newProfile==null){
+        if(newProfile.length===0){
           await db.Users.update({bio:bio}, {
             where:{
             username:username
